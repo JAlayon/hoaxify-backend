@@ -3,6 +3,7 @@ package com.alayon.hoaxify.controllers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -176,6 +177,61 @@ public class UserControllerTest {
 		final User user = new User();
 		final ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
 		assertThat(response.getBody().getUrl()).isEqualTo(API_USERS);
+	}
+
+	@Test
+	public void postUser_whenUserHasNullUsername_receiveMessageOfNullErrorForUsername() {
+		final User user = getValidUser();
+		user.setUsername(null);
+		final ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+		final Map<String, String> validationErrors = response.getBody().getValidationErrors();
+		assertThat(validationErrors.get("username")).isEqualTo("Username cannot be null");
+	}
+
+	@Test
+	public void postUser_whenUserHasNullPassword_receiveMessageOfNullError() {
+		final User user = getValidUser();
+		user.setPassword(null);
+		final ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+		final Map<String, String> validationErrors = response.getBody().getValidationErrors();
+		assertThat(validationErrors.get("password")).isEqualTo("Cannot be null");
+	}
+
+	@Test
+	public void postUser_whenUserHasInvalidLengthUsername_receiveGenericMessageOfSizeError() {
+		final User user = getValidUser();
+		user.setUsername("abc");
+		final ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+		final Map<String, String> validationErrors = response.getBody().getValidationErrors();
+		assertThat(validationErrors.get("username")).isEqualTo("It must have minimum 4 and maximum 255 characters");
+	}
+
+	@Test
+	public void postUser_whenUserHasInvalidPasswordPattern_receiveMessageOfPasswordPatternError() {
+		final User user = getValidUser();
+		user.setPassword("alllowercase");
+		final ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+		final Map<String, String> validationErrors = response.getBody().getValidationErrors();
+		assertThat(validationErrors.get("password"))
+				.isEqualTo("Password must have at least one uppercase, one lowercase letter and one number");
+	}
+
+	@Test
+	public void postUser_whenAnotherUserHasSameUsername_receiveBadRequest() {
+		userRepository.save(getValidUser());
+		final User user = getValidUser();
+		final ResponseEntity<?> response = postSignup(user, null);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+	}
+
+	@Test
+	public void postUser_whenAnotherUserHasSameUsername_receiveMessageOfDuplicateUsername() {
+		userRepository.save(getValidUser());
+		final User user = getValidUser();
+		final ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+		final Map<String, String> validationErrors = response.getBody().getValidationErrors();
+		assertThat(validationErrors.get("username")).isEqualTo("This name is in used");
+
 	}
 
 	private <T> ResponseEntity<T> postSignup(final Object request, final Class<T> response) {
