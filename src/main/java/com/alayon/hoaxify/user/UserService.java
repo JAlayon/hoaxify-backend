@@ -1,6 +1,6 @@
 package com.alayon.hoaxify.user;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -8,11 +8,11 @@ public class UserService {
 
 	private final UserRepository userRepository;
 
-	private final BCryptPasswordEncoder passwordEncoder;
+	private final PasswordEncoder passwordEncoder;
 
-	public UserService(final UserRepository userRepository) {
+	public UserService(final UserRepository userRepository, final PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
-		this.passwordEncoder = new BCryptPasswordEncoder();
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	public User save(final User user) {

@@ -1,5 +1,6 @@
 package com.alayon.hoaxify.controllers;
 
+import static com.alayon.hoaxify.controllers.TestUtil.getValidUser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -236,14 +237,6 @@ public class UserControllerTest {
 
 	private <T> ResponseEntity<T> postSignup(final Object request, final Class<T> response) {
 		return testRestTemplate.postForEntity(API_USERS, request, response);
-	}
-
-	private User getValidUser() {
-		final User user = new User();
-		user.setUsername("test-user");
-		user.setDisplayname("display-name");
-		user.setPassword("P4ssword");
-		return user;
 	}
 
 }
