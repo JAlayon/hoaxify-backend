@@ -101,6 +101,61 @@ public class LoginControllerTest {
 		assertThat(userId.longValue()).isEqualTo(userInDb.getId());
 	}
 
+	@Test
+	public void postLogin_withValidCredentials_receiveLoggedInUserImage() {
+		final User user = TestUtil.getValidUser();
+		final User userInDb = userService.save(user);
+		authentication();
+		final ResponseEntity<Map<String, Object>> response = login(
+				new ParameterizedTypeReference<Map<String, Object>>() {
+				});
+
+		final Map<String, Object> body = response.getBody();
+		final String image = (String) body.get("image");
+		assertThat(image).isEqualTo(userInDb.getImage());
+	}
+
+	@Test
+	public void postLogin_withValidCredentials_receiveLoggedInUserDisplayName() {
+		final User user = TestUtil.getValidUser();
+		final User userInDb = userService.save(user);
+		authentication();
+		final ResponseEntity<Map<String, Object>> response = login(
+				new ParameterizedTypeReference<Map<String, Object>>() {
+				});
+
+		final Map<String, Object> body = response.getBody();
+		final String displayName = (String) body.get("displayname");
+		assertThat(displayName).isEqualTo(userInDb.getDisplayname());
+	}
+
+	@Test
+	public void postLogin_withValidCredentials_receiveLoggedInUserUsername() {
+		final User user = TestUtil.getValidUser();
+		final User userInDb = userService.save(user);
+		authentication();
+		final ResponseEntity<Map<String, Object>> response = login(
+				new ParameterizedTypeReference<Map<String, Object>>() {
+				});
+
+		final Map<String, Object> body = response.getBody();
+		final String username = (String) body.get("username");
+		assertThat(username).isEqualTo(userInDb.getUsername());
+	}
+
+	@Test
+	public void postLogin_withValidCredentials_notReceiveLoggedInUsersPassword() {
+		final User user = TestUtil.getValidUser();
+		userService.save(user);
+		authentication();
+		final ResponseEntity<Map<String, Object>> response = login(
+				new ParameterizedTypeReference<Map<String, Object>>() {
+				});
+
+		final Map<String, Object> body = response.getBody();
+		assertThat(body.containsKey("password")).isFalse();
+	}
+
 	private void authentication() {
 		testRestTemplate.getRestTemplate().getInterceptors()
 				.add(new BasicAuthenticationInterceptor("test-user", "P4ssword"));
