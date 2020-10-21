@@ -325,7 +325,34 @@ public class UserControllerTest {
 		final ResponseEntity<TestPage<?>> response = getUsers(new ParameterizedTypeReference<TestPage<?>>() {
 		});
 		assertThat(response.getBody().getTotalElements()).isEqualTo(2);
+	}
 
+	@Test
+	public void getUserByUsername_whenUserExists_receiveOk() {
+		final String username = "test-user";
+		userService.save(getValidUser(username));
+		final ResponseEntity<?> response = getUser(username, null);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
+
+	@Test
+	public void getUserByUsername_whenUserExists_receivUserWithoutPassword() {
+		final String username = "test-user";
+		userService.save(getValidUser(username));
+		final ResponseEntity<String> response = getUser(username, String.class);
+		assertThat(response.getBody().contains("password")).isFalse();
+	}
+
+	@Test
+	public void getUserByUsername_whenUserDoesNotExist_receiveNotFound() {
+		final ResponseEntity<?> response = getUser("test-user", null);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+
+	@Test
+	public void getUserByUsername_whenUserDoesNotExist_receiveApiError() {
+		final ResponseEntity<ApiError> response = getUser("unknown-user", ApiError.class);
+		assertThat(response.getBody().getMessage().contains("unknown-user")).isTrue();
 	}
 
 	private <T> ResponseEntity<T> postSignup(final Object request, final Class<T> response) {
@@ -338,6 +365,11 @@ public class UserControllerTest {
 
 	private <T> ResponseEntity<T> getUsers(final String path, final ParameterizedTypeReference<T> responseType) {
 		return testRestTemplate.exchange(path, HttpMethod.GET, null, responseType);
+	}
+
+	private <T> ResponseEntity<T> getUser(final String username, final Class<T> responseType) {
+		final String path = API_USERS + "/" + username;
+		return testRestTemplate.getForEntity(path, responseType);
 	}
 
 	private void authenticate(final String username) {

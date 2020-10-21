@@ -15,6 +15,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +43,12 @@ public class UserController {
 	@GetMapping("users")
 	public Page<UserDto> getUsers(@CurrentUser final User loggedInUser, final Pageable pageable) {
 		return userService.getUsers(loggedInUser, pageable).map(UserDto::new);
+	}
+
+	@GetMapping("users/{username}")
+	public UserDto getUserByUserName(@PathVariable final String username) {
+		final User user = userService.getByUsername(username);
+		return new UserDto(user);
 	}
 
 	@ExceptionHandler({ MethodArgumentNotValidException.class })
