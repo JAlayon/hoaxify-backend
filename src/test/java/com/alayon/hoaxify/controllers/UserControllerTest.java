@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ import com.alayon.hoaxify.user.TestPage;
 import com.alayon.hoaxify.user.User;
 import com.alayon.hoaxify.user.UserRepository;
 import com.alayon.hoaxify.user.UserService;
+import com.alayon.hoaxify.user.dto.UserUpdateDto;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -355,6 +357,69 @@ public class UserControllerTest {
 		assertThat(response.getBody().getMessage().contains("unknown-user")).isTrue();
 	}
 
+	@Test
+	public void putUser_whenUnauthorizedUserSendsTheRequest_receiveUnauthorized() {
+		final ResponseEntity<Object> response = putUser(123, null, Object.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+	}
+
+	@Test
+	public void putUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveForbidden() {
+		final User user = userService.save(TestUtil.getValidUser("user1"));
+		authenticate(user.getUsername());
+		final long anotherUserId = user.getId() + 123;
+		final ResponseEntity<Object> response = putUser(anotherUserId, null, Object.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+	}
+
+	@Test
+	public void putUser_whenUnauthorizedUserSendsTheRequest_receiveApiError() {
+		final ResponseEntity<ApiError> response = putUser(123, null, ApiError.class);
+		assertThat(response.getBody().getUrl()).contains("users/123");
+	}
+
+	@Test
+	public void putUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveApiError() {
+		final User user = userService.save(TestUtil.getValidUser("user1"));
+		authenticate(user.getUsername());
+		final long anotherUserId = user.getId() + 123;
+		final ResponseEntity<ApiError> response = putUser(anotherUserId, null, ApiError.class);
+		assertThat(response.getBody().getUrl()).contains("users/" + anotherUserId);
+	}
+
+	@Test
+	public void putUser_whenValidRequestBodyFromAuthorizedUser_receiveOk() {
+		final User user = userService.save(TestUtil.getValidUser("user1"));
+		authenticate(user.getUsername());
+
+		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
+		final ResponseEntity<?> response = putUser(user.getId(), requestEntity, Object.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
+
+	@Test
+	public void putUser_whenValidRequestBodyFromAuthorizedUser_displayNameUpdated() {
+		final User user = userService.save(TestUtil.getValidUser("user1"));
+		authenticate(user.getUsername());
+
+		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
+		putUser(user.getId(), requestEntity, Object.class);
+
+		final User userInDb = userRepository.findByUsername("user1");
+		assertThat(userInDb.getDisplayname()).isEqualTo(TestUtil.getValidUserUpdate().getDisplayName());
+	}
+
+	@Test
+	public void putUser_whenValidRequestBodyFromAuthorizedUser_receiveUserDtoWithUpdatedDisplayName() {
+		final User user = userService.save(TestUtil.getValidUser("user1"));
+		authenticate(user.getUsername());
+
+		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
+		final ResponseEntity<UserUpdateDto> response = putUser(user.getId(), requestEntity, UserUpdateDto.class);
+
+		assertThat(response.getBody().getDisplayName()).isEqualTo(TestUtil.getValidUserUpdate().getDisplayName());
+	}
+
 	private <T> ResponseEntity<T> postSignup(final Object request, final Class<T> response) {
 		return testRestTemplate.postForEntity(API_USERS, request, response);
 	}
@@ -370,6 +435,12 @@ public class UserControllerTest {
 	private <T> ResponseEntity<T> getUser(final String username, final Class<T> responseType) {
 		final String path = API_USERS + "/" + username;
 		return testRestTemplate.getForEntity(path, responseType);
+	}
+
+	private <T> ResponseEntity<T> putUser(final long id, final HttpEntity<?> requestEntity,
+			final Class<T> responseType) {
+		final String path = API_USERS + "/" + id;
+		return testRestTemplate.exchange(path, HttpMethod.PUT, requestEntity, responseType);
 	}
 
 	private void authenticate(final String username) {

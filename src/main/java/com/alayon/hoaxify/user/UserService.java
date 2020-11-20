@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.alayon.hoaxify.error.NotFoundException;
+import com.alayon.hoaxify.user.dto.UserUpdateDto;
 
 @Service
 public class UserService {
@@ -37,6 +38,13 @@ public class UserService {
 		if (userInDb == null)
 			throw new NotFoundException(username + " not found");
 		return userInDb;
+	}
+
+	public User update(final long id, final UserUpdateDto userUpdate) {
+		final User userInDb = userRepository.getOne(id);
+		userInDb.setDisplayname(userUpdate.getDisplayName());
+		return userRepository.save(userInDb);
+
 	}
 
 }

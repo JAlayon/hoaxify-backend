@@ -3,6 +3,7 @@ package com.alayon.hoaxify.controllers;
 import org.junit.Ignore;
 
 import com.alayon.hoaxify.user.User;
+import com.alayon.hoaxify.user.dto.UserUpdateDto;
 
 @Ignore
 public class TestUtil {
@@ -20,5 +21,11 @@ public class TestUtil {
 		final User user = getValidUser();
 		user.setUsername(username);
 		return user;
+	}
+
+	public static UserUpdateDto getValidUserUpdate() {
+		final UserUpdateDto userUpdate = new UserUpdateDto();
+		userUpdate.setDisplayName("new display name");
+		return userUpdate;
 	}
 }
