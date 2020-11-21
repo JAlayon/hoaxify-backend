@@ -1,5 +1,7 @@
 package com.alayon.hoaxify.user;
 
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,6 +45,8 @@ public class UserService {
 	public User update(final long id, final UserUpdateDto userUpdate) {
 		final User userInDb = userRepository.getOne(id);
 		userInDb.setDisplayname(userUpdate.getDisplayName());
+		final String savedImageName = userInDb.getUsername() + UUID.randomUUID().toString().replaceAll("-", "");
+		userInDb.setImage(savedImageName);
 		return userRepository.save(userInDb);
 
 	}
