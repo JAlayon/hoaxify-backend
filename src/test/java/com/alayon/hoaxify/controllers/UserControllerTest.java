@@ -478,6 +478,51 @@ public class UserControllerTest {
 
 	}
 
+	@Test
+	public void putUser_whenInvalidRequestBodyWithNullDisplayNameFromAuthorizedUser_receiveBadRequest()
+			throws IOException {
+		final User user = userService.save(TestUtil.getValidUser("user1"));
+		authenticate(user.getUsername());
+
+		final UserUpdateDto userUpdateDto = new UserUpdateDto();
+
+		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
+		final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+	}
+
+	@Test
+	public void putUser_whenInvalidRequestBodyWithLessThanMinimumSizeDisplayNameFromAuthorizedUser_receiveBadRequest()
+			throws IOException {
+		final User user = userService.save(TestUtil.getValidUser("user1"));
+		authenticate(user.getUsername());
+
+		final UserUpdateDto userUpdateDto = new UserUpdateDto();
+		userUpdateDto.setDisplayName("abc");
+
+		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
+		final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+	}
+
+	@Test
+	public void putUser_whenInvalidRequestBodyWithMoreThanMaxSizeDisplayNameFromAuthorizedUser_receiveBadRequest()
+			throws IOException {
+		final User user = userService.save(TestUtil.getValidUser("user1"));
+		authenticate(user.getUsername());
+
+		final UserUpdateDto userUpdateDto = new UserUpdateDto();
+		final String valueOf256Chars = IntStream.rangeClosed(1, 256).mapToObj(x -> "a").collect(Collectors.joining());
+		userUpdateDto.setDisplayName(valueOf256Chars);
+
+		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
+		final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+	}
+
 	private String readFileToBase64(final String file) throws IOException {
 		final ClassPathResource imageResource = new ClassPathResource(file);
 		final byte[] imageArr = FileUtils.readFileToByteArray(imageResource.getFile());
