@@ -2,6 +2,8 @@ package com.alayon.hoaxify.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -33,5 +35,14 @@ public class FileService {
 
 	public String detectType(final byte[] fileArr) {
 		return tika.detect(fileArr);
+	}
+
+	public void deleteProfileImage(final String image) {
+		try {
+			Files.deleteIfExists(Paths.get(appConfiguration.getFullProfileImagePath() + "/" + image));
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 }
