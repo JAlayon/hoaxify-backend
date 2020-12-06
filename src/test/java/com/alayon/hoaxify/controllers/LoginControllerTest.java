@@ -23,6 +23,7 @@ import com.alayon.hoaxify.error.ApiError;
 import com.alayon.hoaxify.user.User;
 import com.alayon.hoaxify.user.UserRepository;
 import com.alayon.hoaxify.user.UserService;
+import com.alayon.hoaxify.utils.TestUtil;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
