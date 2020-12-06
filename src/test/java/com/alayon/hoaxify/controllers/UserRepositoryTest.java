@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alayon.hoaxify.user.User;
 import com.alayon.hoaxify.user.UserRepository;
+import com.alayon.hoaxify.utils.TestUtil;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest

@@ -1,6 +1,7 @@
 package com.alayon.hoaxify.controllers;
 
-import static com.alayon.hoaxify.controllers.TestUtil.getValidUser;
+import static com.alayon.hoaxify.utils.TestUtil.authenticate;
+import static com.alayon.hoaxify.utils.TestUtil.getValidUser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -26,7 +27,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -39,6 +39,7 @@ import com.alayon.hoaxify.user.UserRepository;
 import com.alayon.hoaxify.user.UserService;
 import com.alayon.hoaxify.user.dto.UserDto;
 import com.alayon.hoaxify.user.dto.UserUpdateDto;
+import com.alayon.hoaxify.utils.TestUtil;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -340,7 +341,7 @@ public class UserControllerTest {
 		userService.save(getValidUser("user1"));
 		userService.save(getValidUser("user2"));
 		userService.save(getValidUser("user3"));
-		authenticate("user1");
+		authenticate(testRestTemplate, "user1");
 		final ResponseEntity<TestPage<?>> response = getUsers(new ParameterizedTypeReference<TestPage<?>>() {
 		});
 		assertThat(response.getBody().getTotalElements()).isEqualTo(2);
@@ -383,7 +384,7 @@ public class UserControllerTest {
 	@Test
 	public void putUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveForbidden() {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 		final long anotherUserId = user.getId() + 123;
 		final ResponseEntity<Object> response = putUser(anotherUserId, null, Object.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -398,7 +399,7 @@ public class UserControllerTest {
 	@Test
 	public void putUser_whenAuthorizedUserSendsUpdateForAnotherUser_receiveApiError() {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 		final long anotherUserId = user.getId() + 123;
 		final ResponseEntity<ApiError> response = putUser(anotherUserId, null, ApiError.class);
 		assertThat(response.getBody().getUrl()).contains("users/" + anotherUserId);
@@ -407,7 +408,7 @@ public class UserControllerTest {
 	@Test
 	public void putUser_whenValidRequestBodyFromAuthorizedUser_receiveOk() {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
 		final ResponseEntity<?> response = putUser(user.getId(), requestEntity, Object.class);
@@ -417,7 +418,7 @@ public class UserControllerTest {
 	@Test
 	public void putUser_whenValidRequestBodyFromAuthorizedUser_displayNameUpdated() {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
 		putUser(user.getId(), requestEntity, Object.class);
@@ -429,7 +430,7 @@ public class UserControllerTest {
 	@Test
 	public void putUser_whenValidRequestBodyFromAuthorizedUser_receiveUserDtoWithUpdatedDisplayName() {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
 		final ResponseEntity<UserUpdateDto> response = putUser(user.getId(), requestEntity, UserUpdateDto.class);
@@ -441,7 +442,7 @@ public class UserControllerTest {
 	public void putUser_whenValidRequestBodyWithSupportedImageFromAuthorizedUser_receiveUserDtoWithRandomImageName()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("user-profile.png");
@@ -459,7 +460,7 @@ public class UserControllerTest {
 	public void putUser_whenValidRequestBodyWithSupportedImageFromAuthorizedUser_imageIsStoredUnderProfileFolder()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("user-profile.png");
@@ -482,7 +483,7 @@ public class UserControllerTest {
 	public void putUser_whenInvalidRequestBodyWithNullDisplayNameFromAuthorizedUser_receiveBadRequest()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = new UserUpdateDto();
 
@@ -496,7 +497,7 @@ public class UserControllerTest {
 	public void putUser_whenInvalidRequestBodyWithLessThanMinimumSizeDisplayNameFromAuthorizedUser_receiveBadRequest()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = new UserUpdateDto();
 		userUpdateDto.setDisplayName("abc");
@@ -511,7 +512,7 @@ public class UserControllerTest {
 	public void putUser_whenInvalidRequestBodyWithMoreThanMaxSizeDisplayNameFromAuthorizedUser_receiveBadRequest()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = new UserUpdateDto();
 		final String valueOf256Chars = IntStream.rangeClosed(1, 256).mapToObj(x -> "a").collect(Collectors.joining());
@@ -526,7 +527,7 @@ public class UserControllerTest {
 	@Test
 	public void putUser_whithValidRequestBodyWithJPGImageFromAuthorizedUser_receiveOk() throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("test-jpg.jpg");
@@ -542,7 +543,7 @@ public class UserControllerTest {
 	@Test
 	public void putUser_whithValidRequestBodyWithGIFImageFromAuthorizedUser_receiveBadRequest() throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("test-gif.gif");
@@ -559,7 +560,7 @@ public class UserControllerTest {
 	public void putUser_whithValidRequestBodyWithTXTImageFromAuthorizedUser_receiveValidationErrorForProfileImage()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("test-txt.txt");
@@ -577,7 +578,7 @@ public class UserControllerTest {
 	public void putUser_whithValidRequestBodyWithJPGImageForUserWhoHasImage_removesOldImageFromStorage()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUser("user1"));
-		authenticate(user.getUsername());
+		authenticate(testRestTemplate, user.getUsername());
 
 		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("test-jpg.jpg");
@@ -624,11 +625,6 @@ public class UserControllerTest {
 			final Class<T> responseType) {
 		final String path = API_USERS + "/" + id;
 		return testRestTemplate.exchange(path, HttpMethod.PUT, requestEntity, responseType);
-	}
-
-	private void authenticate(final String username) {
-		testRestTemplate.getRestTemplate().getInterceptors()
-				.add(new BasicAuthenticationInterceptor(username, "P4ssword"));
 	}
 
 }

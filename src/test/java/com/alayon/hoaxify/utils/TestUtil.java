@@ -1,7 +1,10 @@
-package com.alayon.hoaxify.controllers;
+package com.alayon.hoaxify.utils;
 
 import org.junit.Ignore;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 
+import com.alayon.hoaxify.hoax.Hoax;
 import com.alayon.hoaxify.user.User;
 import com.alayon.hoaxify.user.dto.UserUpdateDto;
 
@@ -28,4 +31,16 @@ public class TestUtil {
 		userUpdate.setDisplayName("new display name");
 		return userUpdate;
 	}
+
+	public static void authenticate(final TestRestTemplate testRestTemplate, final String username) {
+		testRestTemplate.getRestTemplate().getInterceptors()
+				.add(new BasicAuthenticationInterceptor(username, "P4ssword"));
+	}
+
+	public static Hoax getValidHoax() {
+		final Hoax hoax = new Hoax();
+		hoax.setContent("Set content for test hoax");
+		return hoax;
+	}
+
 }
