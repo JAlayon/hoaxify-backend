@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 
+import com.alayon.hoaxify.user.dto.UserRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +21,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alayon.hoaxify.error.ApiError;
-import com.alayon.hoaxify.user.User;
-import com.alayon.hoaxify.user.UserRepository;
-import com.alayon.hoaxify.user.UserService;
+import com.alayon.hoaxify.user.model.User;
+import com.alayon.hoaxify.user.repository.UserRepository;
+import com.alayon.hoaxify.user.service.UserService;
 import com.alayon.hoaxify.utils.TestUtil;
 
 @RunWith(SpringRunner.class)
@@ -81,8 +82,8 @@ public class LoginControllerTest {
 
 	@Test
 	public void postLogin_withValidCredentials_receiveOk() {
-		final User user = TestUtil.getValidUser();
-		userService.save(user);
+		final UserRequest userRequest = TestUtil.getValidUserForRequest();
+		userService.save(userRequest);
 		authentication();
 		final ResponseEntity<?> response = login(Object.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -90,8 +91,8 @@ public class LoginControllerTest {
 
 	@Test
 	public void postLogin_withValidCredentials_receiveLoggedInUserId() {
-		final User user = TestUtil.getValidUser();
-		final User userInDb = userService.save(user);
+		final UserRequest userRequest = TestUtil.getValidUserForRequest();
+		final User userInDb = userService.save(userRequest);
 		authentication();
 		final ResponseEntity<Map<String, Object>> response = login(
 				new ParameterizedTypeReference<Map<String, Object>>() {
@@ -104,8 +105,8 @@ public class LoginControllerTest {
 
 	@Test
 	public void postLogin_withValidCredentials_receiveLoggedInUserImage() {
-		final User user = TestUtil.getValidUser();
-		final User userInDb = userService.save(user);
+		final UserRequest userRequest = TestUtil.getValidUserForRequest();
+		final User userInDb = userService.save(userRequest);
 		authentication();
 		final ResponseEntity<Map<String, Object>> response = login(
 				new ParameterizedTypeReference<Map<String, Object>>() {
@@ -118,8 +119,8 @@ public class LoginControllerTest {
 
 	@Test
 	public void postLogin_withValidCredentials_receiveLoggedInUserDisplayName() {
-		final User user = TestUtil.getValidUser();
-		final User userInDb = userService.save(user);
+		final UserRequest userRequest = TestUtil.getValidUserForRequest();
+		final User userInDb = userService.save(userRequest);
 		authentication();
 		final ResponseEntity<Map<String, Object>> response = login(
 				new ParameterizedTypeReference<Map<String, Object>>() {
@@ -132,8 +133,8 @@ public class LoginControllerTest {
 
 	@Test
 	public void postLogin_withValidCredentials_receiveLoggedInUserUsername() {
-		final User user = TestUtil.getValidUser();
-		final User userInDb = userService.save(user);
+		final UserRequest userRequest = TestUtil.getValidUserForRequest();
+		final User userInDb = userService.save(userRequest);
 		authentication();
 		final ResponseEntity<Map<String, Object>> response = login(
 				new ParameterizedTypeReference<Map<String, Object>>() {
@@ -146,8 +147,8 @@ public class LoginControllerTest {
 
 	@Test
 	public void postLogin_withValidCredentials_notReceiveLoggedInUsersPassword() {
-		final User user = TestUtil.getValidUser();
-		userService.save(user);
+		final UserRequest userRequest = TestUtil.getValidUserForRequest();
+		userService.save(userRequest);
 		authentication();
 		final ResponseEntity<Map<String, Object>> response = login(
 				new ParameterizedTypeReference<Map<String, Object>>() {

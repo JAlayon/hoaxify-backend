@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.user;
+package com.alayon.hoaxify.user.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.alayon.hoaxify.user.dto.UserRequest;
+import com.alayon.hoaxify.user.model.User;
+import com.alayon.hoaxify.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,8 +41,8 @@ public class UserController {
 	UserService userService;
 
 	@PostMapping("users")
-	public GenericResponse createUser(@Valid @RequestBody final User user) {
-		userService.save(user);
+	public GenericResponse createUser(@Valid @RequestBody final UserRequest userRequest) {
+		userService.save(userRequest);
 		return new GenericResponse("user saved");
 	}
 
@@ -62,17 +65,4 @@ public class UserController {
 		return new UserDto(userUpdated);
 	}
 
-	@ExceptionHandler({ MethodArgumentNotValidException.class })
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ApiError handleValidationError(final MethodArgumentNotValidException e, final HttpServletRequest request) {
-		final ApiError error = new ApiError(HttpStatus.BAD_REQUEST.value(), "Validation Error",
-				request.getServletPath());
-		final BindingResult result = e.getBindingResult();
-		final Map<String, String> validationErrors = new HashMap<>();
-		for (final FieldError fieldError : result.getFieldErrors()) {
-			validationErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
-		}
-		error.setValidationErrors(validationErrors);
-		return error;
-	}
 }

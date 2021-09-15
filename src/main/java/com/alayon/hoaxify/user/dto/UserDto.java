@@ -1,6 +1,6 @@
 package com.alayon.hoaxify.user.dto;
 
-import com.alayon.hoaxify.user.User;
+import com.alayon.hoaxify.user.model.User;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

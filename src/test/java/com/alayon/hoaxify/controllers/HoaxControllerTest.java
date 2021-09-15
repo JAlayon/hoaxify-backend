@@ -2,7 +2,7 @@ package com.alayon.hoaxify.controllers;
 
 import static com.alayon.hoaxify.utils.TestUtil.authenticate;
 import static com.alayon.hoaxify.utils.TestUtil.getValidHoax;
-import static com.alayon.hoaxify.utils.TestUtil.getValidUser;
+import static com.alayon.hoaxify.utils.TestUtil.getValidUserForRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
@@ -19,8 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alayon.hoaxify.error.ApiError;
 import com.alayon.hoaxify.hoax.Hoax;
-import com.alayon.hoaxify.user.UserRepository;
-import com.alayon.hoaxify.user.UserService;
+import com.alayon.hoaxify.user.repository.UserRepository;
+import com.alayon.hoaxify.user.service.UserService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -47,7 +47,7 @@ public class HoaxControllerTest {
 
 	@Test
 	public void postHoax_whenHoaxIsValidAndUserIsAuthorized_receiveOk() {
-		userService.save(getValidUser("user1"));
+		userService.save(getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, "user1");
 
 		final Hoax hoax = getValidHoax();

@@ -1,17 +1,18 @@
-package com.alayon.hoaxify.user;
+package com.alayon.hoaxify.user.model;
 
 import java.beans.Transient;
 import java.util.Collection;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.alayon.hoaxify.user.validation.UniqueUsername;
+import com.alayon.hoaxify.user.Views;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +22,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "username"))
 public class User implements UserDetails {
@@ -32,20 +36,15 @@ public class User implements UserDetails {
 	@JsonView(Views.Base.class)
 	private Long id;
 
-	@NotNull(message = "{hoaxify.validation.username.NotNull.message}")
-	@Size(min = 4, max = 255)
-	@UniqueUsername
+	@Column(unique = true, nullable = false, length = 255)
 	@JsonView(Views.Base.class)
 	private String username;
 
-	@NotNull
-	@Size(min = 4, max = 255)
+	@Column(nullable = false, length = 255)
 	@JsonView(Views.Base.class)
 	private String displayname;
 
-	@NotNull
-	@Size(min = 8, max = 255)
-	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$", message = "{hoaxify.constraints.password.Pattern.message}")
+	@Column(nullable = false, length = 255)
 	private String password;
 
 	@JsonView(Views.Base.class)

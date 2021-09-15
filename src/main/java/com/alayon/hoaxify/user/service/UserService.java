@@ -1,7 +1,10 @@
-package com.alayon.hoaxify.user;
+package com.alayon.hoaxify.user.service;
 
 import java.io.IOException;
 
+import com.alayon.hoaxify.user.dto.UserRequest;
+import com.alayon.hoaxify.user.model.User;
+import com.alayon.hoaxify.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,10 +30,13 @@ public class UserService {
 		this.fileService = fileService;
 	}
 
-	public User save(final User user) {
-		userRepository.findByUsername(user.getUsername());
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		return userRepository.save(user);
+	public User save(final UserRequest userRequest) {
+		final User userToSave = User.builder()
+								.username(userRequest.getUsername())
+								.displayname(userRequest.getDisplayname())
+								.password(passwordEncoder.encode(userRequest.getPassword()))
+								.build();
+		return userRepository.save(userToSave);
 	}
 
 	public Page<User> getUsers(final User loggedInUser, final Pageable pageable) {

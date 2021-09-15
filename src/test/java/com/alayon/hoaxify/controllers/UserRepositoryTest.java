@@ -10,8 +10,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.alayon.hoaxify.user.User;
-import com.alayon.hoaxify.user.UserRepository;
+import com.alayon.hoaxify.user.model.User;
+import com.alayon.hoaxify.user.repository.UserRepository;
 import com.alayon.hoaxify.utils.TestUtil;
 
 @RunWith(SpringRunner.class)

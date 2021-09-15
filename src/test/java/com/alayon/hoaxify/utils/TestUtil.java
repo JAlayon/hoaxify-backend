@@ -1,26 +1,41 @@
 package com.alayon.hoaxify.utils;
 
+import com.alayon.hoaxify.user.dto.UserRequest;
 import org.junit.Ignore;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 
 import com.alayon.hoaxify.hoax.Hoax;
-import com.alayon.hoaxify.user.User;
+import com.alayon.hoaxify.user.model.User;
 import com.alayon.hoaxify.user.dto.UserUpdateDto;
 
 @Ignore
 public class TestUtil {
 
-	public static User getValidUser() {
+	public static UserRequest getValidUserForRequest() {
+		final UserRequest user = new UserRequest();
+		user.setUsername("test-user");
+		user.setDisplayname("display-name");
+		user.setPassword("P4ssword");
+		return user;
+	}
+
+	public static User getValidUser(){
 		final User user = new User();
 		user.setUsername("test-user");
 		user.setDisplayname("display-name");
 		user.setPassword("P4ssword");
-		user.setImage("profile-image.png");
+		user.setImage("my-image.png");
 		return user;
 	}
 
-	public static User getValidUser(final String username) {
+	public static UserRequest getValidUserForRequest(final String username) {
+		final UserRequest user = getValidUserForRequest();
+		user.setUsername(username);
+		return user;
+	}
+
+	public static User getValidUser(final String username){
 		final User user = getValidUser();
 		user.setUsername(username);
 		return user;

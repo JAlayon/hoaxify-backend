@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.user;
+package com.alayon.hoaxify.user.validation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,6 +12,11 @@ import javax.validation.Payload;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UniqueUsername {
+
+	/**
+	 * These fields are required by bean validation specification.
+	 *
+	 */
 
 	String message() default "{hoaxify.constraints.username.UniqueUsername.message}";
 

@@ -1,5 +1,6 @@
 package com.alayon.hoaxify.user;
 
+import com.alayon.hoaxify.user.model.User;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
