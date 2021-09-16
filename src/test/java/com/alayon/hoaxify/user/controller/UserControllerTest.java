@@ -34,12 +34,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.alayon.hoaxify.commons.GenericResponse;
 import com.alayon.hoaxify.config.AppConfiguration;
 import com.alayon.hoaxify.error.ApiError;
-import com.alayon.hoaxify.user.TestPage;
+import com.alayon.hoaxify.utils.TestPage;
 import com.alayon.hoaxify.user.model.User;
 import com.alayon.hoaxify.user.repository.UserRepository;
 import com.alayon.hoaxify.user.service.UserService;
-import com.alayon.hoaxify.user.dto.UserDto;
-import com.alayon.hoaxify.user.dto.UserUpdateDto;
+import com.alayon.hoaxify.user.dto.UserResponse;
+import com.alayon.hoaxify.user.dto.UserUpdateRequest;
 import com.alayon.hoaxify.utils.TestUtil;
 
 @RunWith(SpringRunner.class)
@@ -272,15 +272,13 @@ public class UserControllerTest {
 
 	@Test
 	public void getUsers_whenThereAreNoUsersInDb_receiveOk() {
-		final ResponseEntity<Object> response = testRestTemplate.getForEntity(API_USERS, Object.class);
+		final ResponseEntity<Object> response = getUsers(new ParameterizedTypeReference<Object>() {});
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 	@Test
 	public void getUsers_whenThereAreNoUsersInDb_receivePageWithZeroItems() {
-		final ResponseEntity<TestPage<?>> response = testRestTemplate.exchange(API_USERS, HttpMethod.GET, null,
-				new ParameterizedTypeReference<TestPage<?>>() {
-				});
+		final ResponseEntity<TestPage<?>> response = getUsers(new ParameterizedTypeReference<TestPage<?>>() {});
 		assertThat(response.getBody().getTotalElements()).isEqualTo(0);
 	}
 
@@ -413,21 +411,11 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void putUser_whenValidRequestBodyFromAuthorizedUser_receiveOk() {
-		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
-		authenticate(testRestTemplate, user.getUsername());
-
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
-		final ResponseEntity<?> response = putUser(user.getId(), requestEntity, Object.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-	}
-
-	@Test
 	public void putUser_whenValidRequestBodyFromAuthorizedUser_displayNameUpdated() {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
 		putUser(user.getId(), requestEntity, Object.class);
 
 		final User userInDb = userRepository.findByUsername("user1");
@@ -439,8 +427,8 @@ public class UserControllerTest {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
-		final ResponseEntity<UserUpdateDto> response = putUser(user.getId(), requestEntity, UserUpdateDto.class);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(TestUtil.getValidUserUpdate());
+		final ResponseEntity<UserUpdateRequest> response = putUser(user.getId(), requestEntity, UserUpdateRequest.class);
 
 		assertThat(response.getBody().getDisplayName()).isEqualTo(TestUtil.getValidUserUpdate().getDisplayName());
 	}
@@ -451,13 +439,13 @@ public class UserControllerTest {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
+		final UserUpdateRequest userUpdateRequest = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("user-profile.png");
 
-		userUpdateDto.setImage(imageString);
+		userUpdateRequest.setImage(imageString);
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
-		final ResponseEntity<UserDto> response = putUser(user.getId(), requestEntity, UserDto.class);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
+		final ResponseEntity<UserResponse> response = putUser(user.getId(), requestEntity, UserResponse.class);
 
 		assertThat(response.getBody().getImage()).isNotEqualTo("profile-image.png");
 
@@ -469,13 +457,13 @@ public class UserControllerTest {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
+		final UserUpdateRequest userUpdateRequest = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("user-profile.png");
 
-		userUpdateDto.setImage(imageString);
+		userUpdateRequest.setImage(imageString);
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
-		final ResponseEntity<UserDto> response = putUser(user.getId(), requestEntity, UserDto.class);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
+		final ResponseEntity<UserResponse> response = putUser(user.getId(), requestEntity, UserResponse.class);
 
 		final String storedImageName = response.getBody().getImage();
 
@@ -492,9 +480,9 @@ public class UserControllerTest {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = new UserUpdateDto();
+		final UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
 		final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
@@ -506,10 +494,10 @@ public class UserControllerTest {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = new UserUpdateDto();
-		userUpdateDto.setDisplayName("abc");
+		final UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+		userUpdateRequest.setDisplayName("abc");
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
 		final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
@@ -521,11 +509,11 @@ public class UserControllerTest {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = new UserUpdateDto();
+		final UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
 		final String valueOf256Chars = IntStream.rangeClosed(1, 256).mapToObj(x -> "a").collect(Collectors.joining());
-		userUpdateDto.setDisplayName(valueOf256Chars);
+		userUpdateRequest.setDisplayName(valueOf256Chars);
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
 		final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
@@ -536,45 +524,45 @@ public class UserControllerTest {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
+		final UserUpdateRequest userUpdateRequest = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("test-jpg.jpg");
 
-		userUpdateDto.setImage(imageString);
+		userUpdateRequest.setImage(imageString);
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
-		final ResponseEntity<UserDto> response = putUser(user.getId(), requestEntity, UserDto.class);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
+		final ResponseEntity<UserResponse> response = putUser(user.getId(), requestEntity, UserResponse.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
 	}
 
 	@Test
-	public void putUser_whithValidRequestBodyWithGIFImageFromAuthorizedUser_receiveBadRequest() throws IOException {
+	public void putUser_withValidRequestBodyWithGIFImageFromAuthorizedUser_receiveBadRequest() throws IOException {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
+		final UserUpdateRequest userUpdateRequest = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("test-gif.gif");
 
-		userUpdateDto.setImage(imageString);
+		userUpdateRequest.setImage(imageString);
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
 		final ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
 	}
 
 	@Test
-	public void putUser_whithValidRequestBodyWithTXTImageFromAuthorizedUser_receiveValidationErrorForProfileImage()
+	public void putUser_withValidRequestBodyWithTXTImageFromAuthorizedUser_receiveValidationErrorForProfileImage()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
+		final UserUpdateRequest userUpdateRequest = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("test-txt.txt");
 
-		userUpdateDto.setImage(imageString);
+		userUpdateRequest.setImage(imageString);
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
 		final ResponseEntity<ApiError> response = putUser(user.getId(), requestEntity, ApiError.class);
 		final Map<String, String> validationErrors = response.getBody().getValidationErrors();
 		assertThat(validationErrors.get("image")).isEqualTo("Only PNG and JPG files are allowed");
@@ -582,20 +570,20 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void putUser_whithValidRequestBodyWithJPGImageForUserWhoHasImage_removesOldImageFromStorage()
+	public void putUser_withValidRequestBodyWithJPGImageForUserWhoHasImage_removesOldImageFromStorage()
 			throws IOException {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 
-		final UserUpdateDto userUpdateDto = TestUtil.getValidUserUpdate();
+		final UserUpdateRequest userUpdateRequest = TestUtil.getValidUserUpdate();
 		final String imageString = readFileToBase64("test-jpg.jpg");
 
-		userUpdateDto.setImage(imageString);
+		userUpdateRequest.setImage(imageString);
 
-		final HttpEntity<UserUpdateDto> requestEntity = new HttpEntity<>(userUpdateDto);
-		final ResponseEntity<UserDto> response = putUser(user.getId(), requestEntity, UserDto.class);
+		final HttpEntity<UserUpdateRequest> requestEntity = new HttpEntity<>(userUpdateRequest);
+		final ResponseEntity<UserResponse> response = putUser(user.getId(), requestEntity, UserResponse.class);
 
-		putUser(user.getId(), requestEntity, UserDto.class);
+		putUser(user.getId(), requestEntity, UserResponse.class);
 		final String storedImageName = response.getBody().getImage();
 		final String profilePicturePath = appConfig.getFullProfileImagePath() + "/" + storedImageName;
 		final File storedImageFile = new File(profilePicturePath);

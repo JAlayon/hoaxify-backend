@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.user;
+package com.alayon.hoaxify.utils;
 
 import java.util.Iterator;
 import java.util.List;

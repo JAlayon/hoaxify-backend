@@ -7,7 +7,7 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 
 import com.alayon.hoaxify.hoax.Hoax;
 import com.alayon.hoaxify.user.model.User;
-import com.alayon.hoaxify.user.dto.UserUpdateDto;
+import com.alayon.hoaxify.user.dto.UserUpdateRequest;
 
 @Ignore
 public class TestUtil {
@@ -41,8 +41,8 @@ public class TestUtil {
 		return user;
 	}
 
-	public static UserUpdateDto getValidUserUpdate() {
-		final UserUpdateDto userUpdate = new UserUpdateDto();
+	public static UserUpdateRequest getValidUserUpdate() {
+		final UserUpdateRequest userUpdate = new UserUpdateRequest();
 		userUpdate.setDisplayName("new display name");
 		return userUpdate;
 	}

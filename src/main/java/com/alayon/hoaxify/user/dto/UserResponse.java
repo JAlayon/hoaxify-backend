@@ -7,14 +7,14 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UserDto {
+public class UserResponse {
 
 	private long id;
 	private String username;
 	private String displayName;
 	private String image;
 
-	public UserDto(final User user) {
+	public UserResponse(final User user) {
 		this.id = user.getId();
 		this.username = user.getUsername();
 		this.displayName = user.getDisplayname();

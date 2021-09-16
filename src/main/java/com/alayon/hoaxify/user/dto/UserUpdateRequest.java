@@ -8,7 +8,7 @@ import com.alayon.hoaxify.commons.ProfileImage;
 import lombok.Data;
 
 @Data
-public class UserUpdateDto {
+public class UserUpdateRequest {
 
 	@NotNull
 	@Size(min = 4, max = 255)

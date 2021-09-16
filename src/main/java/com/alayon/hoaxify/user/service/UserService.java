@@ -3,6 +3,7 @@ package com.alayon.hoaxify.user.service;
 import java.io.IOException;
 
 import com.alayon.hoaxify.user.dto.UserRequest;
+import com.alayon.hoaxify.user.error.UserNotFoundException;
 import com.alayon.hoaxify.user.model.User;
 import com.alayon.hoaxify.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -10,9 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.alayon.hoaxify.error.NotFoundException;
 import com.alayon.hoaxify.file.FileService;
-import com.alayon.hoaxify.user.dto.UserUpdateDto;
+import com.alayon.hoaxify.user.dto.UserUpdateRequest;
 
 @Service
 public class UserService {
@@ -49,11 +49,11 @@ public class UserService {
 	public User getByUsername(final String username) {
 		final User userInDb = userRepository.findByUsername(username);
 		if (userInDb == null)
-			throw new NotFoundException(username + " not found");
+			throw new UserNotFoundException(username + " not found");
 		return userInDb;
 	}
 
-	public User update(final long id, final UserUpdateDto userUpdate) {
+	public User update(final long id, final UserUpdateRequest userUpdate) {
 		final User userInDb = userRepository.getOne(id);
 		userInDb.setDisplayname(userUpdate.getDisplayName());
 		if (userUpdate.getImage() != null) {
