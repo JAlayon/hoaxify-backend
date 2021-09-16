@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.controllers;
+package com.alayon.hoaxify.login.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,7 +49,7 @@ public class LoginControllerTest {
 	}
 
 	@Test
-	public void postLogin_whithoutUserCredentials_receiveUnauthorized() {
+	public void postLogin_withoutUserCredentials_receiveUnauthorized() {
 		final ResponseEntity<?> response = login(Object.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 	}
@@ -62,7 +62,7 @@ public class LoginControllerTest {
 	}
 
 	@Test
-	public void postLogin_withIncorrectCredentials_receiveApiError() {
+	public void postLogin_withoutUserCredentials_receiveApiError() {
 		final ResponseEntity<ApiError> response = login(ApiError.class);
 		assertThat(response.getBody().getUrl()).isEqualTo(API_V1_LOGIN);
 	}

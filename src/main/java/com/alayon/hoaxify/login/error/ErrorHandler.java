@@ -1,7 +1,8 @@
-package com.alayon.hoaxify.error;
+package com.alayon.hoaxify.login.error;
 
 import java.util.Map;
 
+import com.alayon.hoaxify.error.ApiError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.error.ErrorAttributeOptions.Include;

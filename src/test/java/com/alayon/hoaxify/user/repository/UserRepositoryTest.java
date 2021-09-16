@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.controllers;
+package com.alayon.hoaxify.user.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

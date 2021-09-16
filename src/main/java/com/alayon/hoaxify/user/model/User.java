@@ -4,12 +4,8 @@ import java.beans.Transient;
 import java.util.Collection;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
-import com.alayon.hoaxify.user.validation.UniqueUsername;
-import com.alayon.hoaxify.user.Views;
+import com.alayon.hoaxify.user.jsonviews.Views;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;

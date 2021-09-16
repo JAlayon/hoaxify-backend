@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.user;
+package com.alayon.hoaxify.user.jsonviews;
 
 public class Views {
 

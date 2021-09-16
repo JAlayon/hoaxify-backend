@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.controllers;
+package com.alayon.hoaxify.user.controller;
 
 import static com.alayon.hoaxify.utils.TestUtil.authenticate;
 import static com.alayon.hoaxify.utils.TestUtil.getValidUserForRequest;
