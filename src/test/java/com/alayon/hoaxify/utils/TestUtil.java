@@ -5,7 +5,7 @@ import org.junit.Ignore;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 
-import com.alayon.hoaxify.hoax.Hoax;
+import com.alayon.hoaxify.hoax.model.Hoax;
 import com.alayon.hoaxify.user.model.User;
 import com.alayon.hoaxify.user.dto.UserUpdateRequest;
 

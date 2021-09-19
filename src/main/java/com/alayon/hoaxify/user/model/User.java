@@ -2,9 +2,11 @@ package com.alayon.hoaxify.user.model;
 
 import java.beans.Transient;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.*;
 
+import com.alayon.hoaxify.hoax.model.Hoax;
 import com.alayon.hoaxify.user.jsonviews.Views;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,6 +47,9 @@ public class User implements UserDetails {
 
 	@JsonView(Views.Base.class)
 	private String image;
+
+	@OneToMany(mappedBy = "user")
+	private List<Hoax> hoaxes;
 
 	@Override
 	@Transient

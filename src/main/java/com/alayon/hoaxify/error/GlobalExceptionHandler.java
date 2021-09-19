@@ -1,7 +1,6 @@
-package com.alayon.hoaxify.user.error;
+package com.alayon.hoaxify.error;
 
-import com.alayon.hoaxify.error.ApiError;
-import com.alayon.hoaxify.user.controller.UserController;
+import com.alayon.hoaxify.user.error.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
@@ -15,8 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice(assignableTypes = UserController.class)
-public class UserExceptionHandler {
+@RestControllerAdvice
+public class GlobalExceptionHandler {
 
     @ExceptionHandler({ MethodArgumentNotValidException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
