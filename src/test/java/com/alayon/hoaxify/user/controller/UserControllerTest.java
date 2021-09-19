@@ -520,7 +520,7 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void putUser_whithValidRequestBodyWithJPGImageFromAuthorizedUser_receiveOk() throws IOException {
+	public void putUser_withValidRequestBodyWithJPGImageFromAuthorizedUser_receiveOk() throws IOException {
 		final User user = userService.save(TestUtil.getValidUserForRequest("user1"));
 		authenticate(testRestTemplate, user.getUsername());
 

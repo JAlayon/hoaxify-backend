@@ -11,14 +11,14 @@ import lombok.Data;
 public class AppConfiguration {
 
 	private String uploadPath;
-	private String profileImagesFolder = "profile";
-	private String attachmentsFolder = "attachments";
+	private String profileImages;
+	private String attachments;
 
 	public String getFullProfileImagePath() {
-		return new StringBuilder().append(uploadPath).append("/").append(profileImagesFolder).toString();
+		return new StringBuilder().append(uploadPath).append("/").append(profileImages).toString();
 	}
 
 	public String getFullAttachmentPath() {
-		return new StringBuilder().append(uploadPath).append("/").append(attachmentsFolder).toString();
+		return new StringBuilder().append(uploadPath).append("/").append(attachments).toString();
 	}
 }

@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.commons;
+package com.alayon.hoaxify.user.validation;
 
 import java.util.Base64;
 

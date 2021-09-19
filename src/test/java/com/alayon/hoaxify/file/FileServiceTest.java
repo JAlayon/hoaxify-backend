@@ -1,4 +1,4 @@
-package com.alayon.hoaxify.utils;
+package com.alayon.hoaxify.file;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,5 +50,4 @@ public class FileServiceTest {
 		final String fileType = fileService.detectType(fileArr);
 		assertThat(fileType).isEqualToIgnoringCase("image/png");
 	}
-
 }

@@ -71,7 +71,7 @@ public class StaticResourceTest {
 		final File target = new File(appConfig.getFullProfileImagePath() + "/" + fileName);
 		FileUtils.copyFile(source, target);
 
-		mock.perform(get("/images/" + appConfig.getProfileImagesFolder() + "/" + fileName)).andExpect(status().isOk());
+		mock.perform(get("/images/" + appConfig.getProfileImages() + "/" + fileName)).andExpect(status().isOk());
 	}
 
 	@Test
@@ -81,12 +81,12 @@ public class StaticResourceTest {
 		final File target = new File(appConfig.getFullAttachmentPath() + "/" + fileName);
 		FileUtils.copyFile(source, target);
 
-		mock.perform(get("/images/" + appConfig.getAttachmentsFolder() + "/" + fileName)).andExpect(status().isOk());
+		mock.perform(get("/images/" + appConfig.getAttachments() + "/" + fileName)).andExpect(status().isOk());
 	}
 
 	@Test
 	public void getStaticFile_whenKImageDoesNotExist_receiveNotFound() throws Exception {
-		mock.perform(get("/images/" + appConfig.getAttachmentsFolder() + "/no-image.png"))
+		mock.perform(get("/images/" + appConfig.getAttachments() + "/no-image.png"))
 				.andExpect(status().isNotFound());
 	}
 
@@ -97,7 +97,7 @@ public class StaticResourceTest {
 		final File target = new File(appConfig.getFullAttachmentPath() + "/" + fileName);
 		FileUtils.copyFile(source, target);
 
-		final MvcResult result = mock.perform(get("/images/" + appConfig.getAttachmentsFolder() + "/" + fileName))
+		final MvcResult result = mock.perform(get("/images/" + appConfig.getAttachments() + "/" + fileName))
 				.andExpect(status().isOk()).andReturn();
 
 		final String cacheControl = result.getResponse().getHeaderValue("Cache-Control").toString();
