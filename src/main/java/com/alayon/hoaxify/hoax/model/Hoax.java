@@ -1,6 +1,7 @@
 package com.alayon.hoaxify.hoax.model;
 
 import com.alayon.hoaxify.user.model.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -18,6 +19,7 @@ public class Hoax {
 	private String content;
 
 	@ManyToOne
+	@JsonIgnore
 	private User user;
 
 	@Temporal(TemporalType.TIMESTAMP)
