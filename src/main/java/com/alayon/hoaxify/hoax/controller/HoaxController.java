@@ -31,4 +31,9 @@ public class HoaxController {
 	public Page<HoaxResponse> getAllHoaxes(Pageable pageable){
 		return hoaxService.getAllHoaxes(pageable).map(HoaxResponse::new);
 	}
+
+	@GetMapping("users/{username}/hoaxes")
+	Page<HoaxResponse> getHoaxesByUsername(@PathVariable String username, Pageable pageable){
+		return hoaxService.getHoaxesByUsername(username, pageable).map(HoaxResponse::new);
+	}
 }
