@@ -5,8 +5,12 @@ import static com.alayon.hoaxify.utils.TestUtil.getValidHoax;
 import static com.alayon.hoaxify.utils.TestUtil.getValidUserForRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.alayon.hoaxify.hoax.dto.HoaxResponse;
 import com.alayon.hoaxify.hoax.repository.HoaxRepository;
+import com.alayon.hoaxify.hoax.service.HoaxService;
 import com.alayon.hoaxify.user.model.User;
+import com.alayon.hoaxify.utils.TestPage;
+import com.alayon.hoaxify.utils.TestUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,7 +41,6 @@ import java.util.stream.IntStream;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-
 public class HoaxControllerTest {
 
 	private static final String API_HOAXES = "/api/v1/hoaxes";
@@ -51,6 +56,9 @@ public class HoaxControllerTest {
 
 	@Autowired
 	HoaxRepository hoaxRepository;
+
+	@Autowired
+	HoaxService hoaxService;
 
 	@PersistenceUnit
 	EntityManagerFactory entityManagerFactory;
@@ -207,7 +215,123 @@ public class HoaxControllerTest {
 		assertThat(userInDb.getHoaxes().size()).isEqualTo(1);
 	}
 
+	@Test
+	public void postHoax_whenHoaxIsValidAndUserIsAuthorized_receiveHoaxResponse() {
+		User user = userService.save(getValidUserForRequest("user1"));
+		authenticate(testRestTemplate, "user1");
 
+		final Hoax hoax = getValidHoax();
+		ResponseEntity<HoaxResponse> response = postHoax(hoax, HoaxResponse.class);
+		assertThat(response.getBody().getUser().getUsername()).isEqualTo("user1");
+	}
+
+	@Test
+	public void getHoaxes_whenThereAreNoHoaxes_receiveOk(){
+		ResponseEntity<?> response = testRestTemplate.getForEntity(API_HOAXES, null);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
+
+	@Test
+	public void getHoaxes_whenThereAreNoHoaxes_receivePageWithZeroElements(){
+		ResponseEntity<TestPage<Object>> response = getHoaxes(new ParameterizedTypeReference<TestPage<Object>>() {
+		});
+		assertThat(response.getBody().getTotalElements()).isEqualTo(0);
+	}
+
+	@Test
+	public void getHoaxes_whenThereAreHoaxes_receivePageWithElements(){
+		User user = userService.save(TestUtil.getValidUserForRequest("user1"));
+		hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), user);
+		hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), user);
+		hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), user);
+
+		ResponseEntity<TestPage<Object>> response = getHoaxes(new ParameterizedTypeReference<TestPage<Object>>() {
+		});
+		assertThat(response.getBody().getTotalElements()).isEqualTo(3);
+	}
+
+	@Test
+	public void getHoaxes_whenThereAreHoaxes_receivePageWithHoaxResponse(){
+		User user = userService.save(TestUtil.getValidUserForRequest("user1"));
+		hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), user);
+
+		ResponseEntity<TestPage<HoaxResponse>> response = getHoaxes(new ParameterizedTypeReference<TestPage<HoaxResponse>>() {
+		});
+		HoaxResponse hoaxResponse = response.getBody().getContent().get(0);
+		assertThat(hoaxResponse.getUser().getUsername()).isEqualTo("user1");
+	}
+
+	@Test
+	public void getHoaxesByUsername_whenUserExists_receiveOk(){
+		userService.save(TestUtil.getValidUserForRequest("user1"));
+		ResponseEntity<Object> response = getHoaxesByUsername("user1", new ParameterizedTypeReference<Object>() {
+		});
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
+
+	@Test
+	public void getHoaxesByUsername_whenUserDoesNotExists_receiveNotFound(){
+		ResponseEntity<Object> response =  getHoaxesByUsername("unknown-user", new ParameterizedTypeReference<Object>() {
+		});
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+	}
+
+	@Test
+	public void getHoaxesByUsername_whenUserExists_receivePageWithZeroHoaxes(){
+		userService.save(TestUtil.getValidUserForRequest("user1"));
+		ResponseEntity<TestPage<Object>> response = getHoaxesByUsername("user1", new ParameterizedTypeReference<TestPage<Object>>() {
+		});
+		assertThat(response.getBody().getTotalElements()).isEqualTo(0);
+	}
+
+	@Test
+	public void getHoaxesByUsername_whenUserExistsWithHoax_receivePageWithHoaxResponse(){
+		User user = userService.save(TestUtil.getValidUserForRequest("user1"));
+		hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), user);
+
+		ResponseEntity<TestPage<HoaxResponse>> response = getHoaxesByUsername("user1", new ParameterizedTypeReference<TestPage<HoaxResponse>>() {
+		});
+		HoaxResponse hoaxStored = response.getBody().getContent().get(0);
+		assertThat(hoaxStored.getUser().getUsername()).isEqualTo("user1");
+	}
+
+	@Test
+	public void getHoaxesByUsername_whenUserExistsWithMultipleHoaxes_receivePageWithMatchingHoaxesCount(){
+		User user = userService.save(TestUtil.getValidUserForRequest("user1"));
+		hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), user);
+		hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), user);
+		hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), user);
+
+		ResponseEntity<TestPage<HoaxResponse>> response = getHoaxesByUsername("user1", new ParameterizedTypeReference<TestPage<HoaxResponse>>() {
+		});
+		assertThat(response.getBody().getTotalElements()).isEqualTo(3);
+	}
+
+	@Test
+	public void getHoaxesByUsername_whenMultipleUsersExistWithMultipleHoaxes_receivePageWithMatchingHoaxesCount(){
+		User userWithThreeHoaxes = userService.save(TestUtil.getValidUserForRequest("user1"));
+		IntStream.rangeClosed(1,3).forEach(i -> {
+			hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), userWithThreeHoaxes);
+		});
+
+		User userWithFiveHoaxes = userService.save(TestUtil.getValidUserForRequest("user2"));
+		IntStream.rangeClosed(1,5).forEach(i -> {
+			hoaxService.saveHoax(TestUtil.getValidHoaxRequest(), userWithFiveHoaxes);
+		});
+
+		ResponseEntity<TestPage<HoaxResponse>> response = getHoaxesByUsername(userWithFiveHoaxes.getUsername(), new ParameterizedTypeReference<TestPage<HoaxResponse>>() {
+		});
+		assertThat(response.getBody().getTotalElements()).isEqualTo(5);
+	}
+
+	private <T> ResponseEntity<T> getHoaxesByUsername(String username, ParameterizedTypeReference<T> responseType){
+		String path = "/api/v1/users/" + username + "/hoaxes";
+		return testRestTemplate.exchange(path,HttpMethod.GET, null, responseType);
+	}
+
+	private <T> ResponseEntity<T> getHoaxes(final ParameterizedTypeReference<T> responseType){
+		return testRestTemplate.exchange(API_HOAXES, HttpMethod.GET, null, responseType);
+	}
 
 	private <T> ResponseEntity<T> postHoax(final Hoax hoax, final Class<T> responseType) {
 		return testRestTemplate.postForEntity(API_HOAXES, hoax, responseType);

@@ -1,5 +1,7 @@
 package com.alayon.hoaxify.utils;
 
+import com.alayon.hoaxify.hoax.dto.HoaxRequest;
+import com.alayon.hoaxify.hoax.repository.HoaxRepository;
 import com.alayon.hoaxify.user.dto.UserRequest;
 import org.junit.Ignore;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -56,6 +58,10 @@ public class TestUtil {
 		final Hoax hoax = new Hoax();
 		hoax.setContent("Set content for test hoax");
 		return hoax;
+	}
+
+	public static HoaxRequest getValidHoaxRequest(){
+		return new HoaxRequest(getValidHoax().getContent());
 	}
 
 }
