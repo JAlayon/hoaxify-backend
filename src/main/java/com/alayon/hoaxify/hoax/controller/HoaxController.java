@@ -42,42 +42,25 @@ public class HoaxController {
 		return hoaxService.getHoaxesByUsername(username, pageable).map(HoaxResponse::new);
 	}
 
-	@GetMapping("hoaxes/{id:[0-9]+}")
+	@GetMapping({
+			"hoaxes/{id:[0-9]+}",
+			"users/{username}/hoaxes/{id:[0-9]+}"
+			})
 	public ResponseEntity<?> getHoaxesRelative
 			(@PathVariable long id,
+			 @PathVariable(required = false) String username,
 			 @RequestParam(name="direction", defaultValue = "after") String direction,
 			 @RequestParam(name="count", defaultValue = "false", required = false) boolean count,
 			 Pageable pageable){
 		if (!direction.equalsIgnoreCase("after"))
-			return ResponseEntity.ok(hoaxService.getOldHoaxes(id, pageable).map(HoaxResponse::new));
+			return ResponseEntity.ok(hoaxService.getOldHoaxes(id, username, pageable).map(HoaxResponse::new));
 
 		if (count) {
-			Long newHoaxCount = hoaxService.getNewHoaxesCount(id);
+			Long newHoaxCount = hoaxService.getNewHoaxesCount(id, username);
 			return ResponseEntity.ok(Collections.singletonMap("count", newHoaxCount));
 		}
-		List<HoaxResponse> newHoaxes = hoaxService.getNewHoaxes(id, pageable).stream().map(HoaxResponse::new)
+		List<HoaxResponse> newHoaxes = hoaxService.getNewHoaxes(id,username, pageable).stream().map(HoaxResponse::new)
 				.collect(Collectors.toList());
 		return ResponseEntity.ok(newHoaxes);
 	}
-
-	@GetMapping("users/{username}/hoaxes/{id:[0-9]+}")
-	public ResponseEntity<?> getHoaxesRelativeForUser(
-			@PathVariable String username,
-			@PathVariable long id,
-			@RequestParam(name = "direction", defaultValue = "after") String direction,
-			@RequestParam(name="count", defaultValue = "false", required = false) boolean count,
-			Pageable pageable
-	){
-		if (!direction.equalsIgnoreCase("after"))
-			return ResponseEntity.ok(hoaxService.getOldHoaxesOfUser(id, username, pageable).map(HoaxResponse::new));
-
-		if (count){
-			Long newHoaxCount = hoaxService.getNewHoaxesCountOfUser(id, username);
-			return ResponseEntity.ok(Collections.singletonMap("count", newHoaxCount));
-		}
-		List<HoaxResponse> newHoaxes = hoaxService.getNewHoaxesOfUser(id, username, pageable).stream().map(HoaxResponse::new)
-				.collect(Collectors.toList());
-		return ResponseEntity.ok(newHoaxes);
-	}
-
 }

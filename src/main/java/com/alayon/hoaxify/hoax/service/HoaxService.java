@@ -8,8 +8,13 @@ import com.alayon.hoaxify.user.model.User;
 import com.alayon.hoaxify.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -43,30 +48,42 @@ public class HoaxService {
         return hoaxRepository.findByUser(userInDb, pageable);
     }
 
-    public Page<Hoax> getOldHoaxes(long id, Pageable pageable) {
-        return hoaxRepository.findByIdLessThan(id, pageable);
+    public Page<Hoax> getOldHoaxes(long id, String username, Pageable pageable) {
+        Specification<Hoax> spec = Specification.where(idLessThan(id));
+        if (username != null) {
+            final User userInDb = userService.getByUsername(username);
+            spec = spec.and(userIs(userInDb));
+        }
+        return hoaxRepository.findAll(spec, pageable);
     }
 
-    public Page<Hoax> getOldHoaxesOfUser(long id, String username,  Pageable pageable) {
-        final User userInDb = userService.getByUsername(username);
-        return hoaxRepository.findByIdLessThanAndUser(id, userInDb, pageable);
+    public List<Hoax> getNewHoaxes(long id, String username, Pageable pageable) {
+        Specification<Hoax> spec = Specification.where(idGreaterThan(id));
+        if (username != null){
+            final User userInDb = userService.getByUsername(username);
+            spec = spec.and(userIs(userInDb));
+        }
+        return hoaxRepository.findAll(spec, pageable.getSort());
     }
 
-    public List<Hoax> getNewHoaxes(long id, Pageable pageable) {
-        return hoaxRepository.findByIdGreaterThan(id, pageable.getSort());
+    public Long getNewHoaxesCount(long id, String username) {
+        Specification<Hoax> spec = Specification.where(idGreaterThan(id));
+        if (username != null){
+            final User userInDb = userService.getByUsername(username);
+            spec = spec.and(userIs(userInDb));
+        }
+        return hoaxRepository.count(spec);
     }
 
-    public List<Hoax> getNewHoaxesOfUser(long id, String username, Pageable pageable) {
-        final User userInDb = userService.getByUsername(username);
-        return hoaxRepository.findByIdGreaterThanAndUser(id, userInDb, pageable.getSort());
+    private Specification<Hoax> userIs(User user){
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.equal(root.get("user"), user);
     }
 
-    public Long getNewHoaxesCount(long id) {
-        return hoaxRepository.countByIdGreaterThan(id);
+    private Specification<Hoax> idLessThan(long id){
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.lessThan(root.get("id"), id);
     }
 
-    public Long getNewHoaxesCountOfUser(long id, String username) {
-        final User userInDb = userService.getByUsername(username);
-        return hoaxRepository.countByIdGreaterThanAndUser(id, userInDb);
+    private Specification<Hoax> idGreaterThan(long id){
+        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.greaterThan(root.get("id"), id);
     }
 }
