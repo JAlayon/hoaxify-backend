@@ -10,7 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,5 +50,14 @@ public class HoaxService {
     public Page<Hoax> getOldHoaxesOfUser(long id, String username,  Pageable pageable) {
         final User userInDb = userService.getByUsername(username);
         return hoaxRepository.findByIdLessThanAndUser(id, userInDb, pageable);
+    }
+
+    public List<Hoax> getNewHoaxes(long id, Pageable pageable) {
+        return hoaxRepository.findByIdGreaterThan(id, pageable.getSort());
+    }
+
+    public List<Hoax> getNewHoaxesOfUser(long id, String username, Pageable pageable) {
+        final User userInDb = userService.getByUsername(username);
+        return hoaxRepository.findByIdGreaterThanAndUser(id, userInDb, pageable.getSort());
     }
 }
