@@ -15,4 +15,6 @@ public interface HoaxRepository extends JpaRepository<Hoax, Long> {
     List<Hoax> findByIdGreaterThan(long id, Sort sort);
     Page<Hoax> findByIdLessThanAndUser(long id, User user, Pageable pageable);
     List<Hoax> findByIdGreaterThanAndUser(long id, User user, Sort sort);
+    Long countByIdGreaterThan(long id);
+    Long countByIdGreaterThanAndUser(long id, User user);
 }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,12 +43,18 @@ public class HoaxController {
 	}
 
 	@GetMapping("hoaxes/{id:[0-9]+}")
-	public ResponseEntity<?> getHoaxesRelative(@PathVariable long id,
-														  @RequestParam(name="direction", defaultValue = "after") String direction,
-														  Pageable pageable){
+	public ResponseEntity<?> getHoaxesRelative
+			(@PathVariable long id,
+			 @RequestParam(name="direction", defaultValue = "after") String direction,
+			 @RequestParam(name="count", defaultValue = "false", required = false) boolean count,
+			 Pageable pageable){
 		if (!direction.equalsIgnoreCase("after"))
 			return ResponseEntity.ok(hoaxService.getOldHoaxes(id, pageable).map(HoaxResponse::new));
 
+		if (count) {
+			Long newHoaxCount = hoaxService.getNewHoaxesCount(id);
+			return ResponseEntity.ok(Collections.singletonMap("count", newHoaxCount));
+		}
 		List<HoaxResponse> newHoaxes = hoaxService.getNewHoaxes(id, pageable).stream().map(HoaxResponse::new)
 				.collect(Collectors.toList());
 		return ResponseEntity.ok(newHoaxes);
@@ -58,11 +65,16 @@ public class HoaxController {
 			@PathVariable String username,
 			@PathVariable long id,
 			@RequestParam(name = "direction", defaultValue = "after") String direction,
+			@RequestParam(name="count", defaultValue = "false", required = false) boolean count,
 			Pageable pageable
 	){
 		if (!direction.equalsIgnoreCase("after"))
 			return ResponseEntity.ok(hoaxService.getOldHoaxesOfUser(id, username, pageable).map(HoaxResponse::new));
 
+		if (count){
+			Long newHoaxCount = hoaxService.getNewHoaxesCountOfUser(id, username);
+			return ResponseEntity.ok(Collections.singletonMap("count", newHoaxCount));
+		}
 		List<HoaxResponse> newHoaxes = hoaxService.getNewHoaxesOfUser(id, username, pageable).stream().map(HoaxResponse::new)
 				.collect(Collectors.toList());
 		return ResponseEntity.ok(newHoaxes);
