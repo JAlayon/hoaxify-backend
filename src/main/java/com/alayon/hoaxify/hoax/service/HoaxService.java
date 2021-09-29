@@ -1,6 +1,7 @@
 package com.alayon.hoaxify.hoax.service;
 
 import com.alayon.hoaxify.hoax.dto.HoaxRequest;
+import com.alayon.hoaxify.hoax.dto.HoaxResponse;
 import com.alayon.hoaxify.hoax.model.Hoax;
 import com.alayon.hoaxify.hoax.repository.HoaxRepository;
 import com.alayon.hoaxify.user.model.User;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class HoaxService {
@@ -37,5 +39,14 @@ public class HoaxService {
     public Page<Hoax> getHoaxesByUsername(String username, Pageable pageable) {
         final User userInDb = userService.getByUsername(username);
         return hoaxRepository.findByUser(userInDb, pageable);
+    }
+
+    public Page<Hoax> getOldHoaxes(long id, Pageable pageable) {
+        return hoaxRepository.findByIdLessThan(id, pageable);
+    }
+
+    public Page<Hoax> getOldHoaxesOfUser(long id, String username,  Pageable pageable) {
+        final User userInDb = userService.getByUsername(username);
+        return hoaxRepository.findByIdLessThanAndUser(id, userInDb, pageable);
     }
 }

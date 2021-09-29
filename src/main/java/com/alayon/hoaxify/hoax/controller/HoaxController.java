@@ -33,7 +33,23 @@ public class HoaxController {
 	}
 
 	@GetMapping("users/{username}/hoaxes")
-	Page<HoaxResponse> getHoaxesByUsername(@PathVariable String username, Pageable pageable){
+	public Page<HoaxResponse> getHoaxesByUsername(@PathVariable String username, Pageable pageable){
 		return hoaxService.getHoaxesByUsername(username, pageable).map(HoaxResponse::new);
 	}
+
+	@GetMapping("hoaxes/{id:[0-9]+}")
+	public Page<HoaxResponse> getHoaxesRelative(@PathVariable long id, Pageable pageable){
+		return hoaxService.getOldHoaxes(id, pageable).map(HoaxResponse::new);
+	}
+
+	@GetMapping("users/{username}/hoaxes/{id:[0-9]+}")
+	public Page<HoaxResponse> getHoaxesRelativeForUser(
+			@PathVariable String username,
+			@PathVariable long id,
+			Pageable pageable
+	){
+		return hoaxService.getOldHoaxesOfUser(id, username, pageable).map(HoaxResponse::new);
+	}
+
+
 }
